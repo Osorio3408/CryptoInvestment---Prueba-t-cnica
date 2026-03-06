@@ -6,33 +6,36 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Services\CoinMarketCapService;
 use App\Models\Cryptocurrency;
+use App\Http\Resources\CryptocurrencyResource;
+
 
 class CryptoController extends Controller
 {
-    public function index(CoinMarketCapService $service): JsonResponse
+    public function index()
     {
-        return response()->json(
-            $service->getLatest()
-        );
+        $cryptos = Cryptocurrency::all();
+
+        return CryptocurrencyResource::collection($cryptos);
     }
 
 
-    public function history(string $symbol): JsonResponse
-    {
-        $crypto = Cryptocurrency::whereRaw('LOWER(symbol) = ?', [strtolower($symbol)])->firstOrFail();
-        
-        $history = $crypto->priceHistories()
-            ->orderBy('recorded_at')
-            ->limit(100)
-            ->get(['price', 'recorded_at']);
+public function history(string $symbol)
+{
+    $symbol = strtoupper($symbol);
 
-        return response()->json(
-            $history->map(function ($item) {
-                return [
-                    'timestamp' => $item->recorded_at,
-                    'price' => $item->price
-                ];
-            })
-        );
+    if (!preg_match('/^[A-Z0-9]+$/', $symbol)) {
+        return response()->json([
+            'error' => 'Invalid cryptocurrency symbol'
+        ], 422);
     }
+
+    $crypto = Cryptocurrency::where('symbol', $symbol)->firstOrFail();
+
+    $history = $crypto->priceHistories()
+        ->orderBy('recorded_at')
+        ->limit(50)
+        ->get(['price', 'recorded_at']);
+
+    return response()->json($history);
+}
 }

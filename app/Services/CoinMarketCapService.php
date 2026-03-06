@@ -10,14 +10,21 @@ class CoinMarketCapService
 {
     public function getLatest(): array
     {
-        return Cache::remember('cmc_latest_prices', 60, function () {
+
+        $cacheKey = 'cmc_latest_prices';
+
+        return Cache::remember($cacheKey, now()->addSeconds(60), function () {
 
             try {
 
-                $response = Http::withHeaders([
-                    'X-CMC_PRO_API_KEY' => config('services.coinmarketcap.key'),
-                ])->get('https://sandbox-api.coinmarketcap.com/v1/cryptocurrency/listings/latest');
-            } catch (\Exception $e) {
+                $response = Http::timeout(10)
+                    ->retry(3, 200)
+                    ->withHeaders([
+                        'X-CMC_PRO_API_KEY' => config('services.coinmarketcap.key'),
+                    ])
+                    ->get('https://sandbox-api.coinmarketcap.com/v1/cryptocurrency/listings/latest');
+
+            } catch (\Throwable $e) {
 
                 Log::error('CoinMarketCap connection failed', [
                     'message' => $e->getMessage()
@@ -25,7 +32,9 @@ class CoinMarketCapService
 
                 return [];
             }
+
             if (!$response->successful()) {
+
                 Log::error('CoinMarketCap API error', [
                     'status' => $response->status(),
                     'body' => $response->body()
@@ -35,6 +44,8 @@ class CoinMarketCapService
             }
 
             return $response->json();
+
         });
+
     }
 }
