@@ -21,6 +21,9 @@ class PriceHistory extends Model
         'volume_24h',
         'recorded_at'
     ];
+    protected $casts = [
+    'recorded_at' => 'datetime'
+];
 
     public function cryptocurrency()
     {

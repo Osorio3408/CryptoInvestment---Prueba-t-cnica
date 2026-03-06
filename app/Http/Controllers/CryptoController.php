@@ -13,29 +13,30 @@ class CryptoController extends Controller
 {
     public function index()
     {
-        $cryptos = Cryptocurrency::all();
+        $cryptos = Cryptocurrency::limit(20)->get();
 
         return CryptocurrencyResource::collection($cryptos);
     }
 
 
-public function history(string $symbol)
+public function history(int $id)
 {
-    $symbol = strtoupper($symbol);
+    $crypto = Cryptocurrency::find($id);
 
-    if (!preg_match('/^[A-Z0-9]+$/', $symbol)) {
-        return response()->json([
-            'error' => 'Invalid cryptocurrency symbol'
-        ], 422);
+    if (!$crypto) {
+        return response()->json([]);
     }
 
-    $crypto = Cryptocurrency::where('symbol', $symbol)->firstOrFail();
-
     $history = $crypto->priceHistories()
-        ->orderBy('recorded_at')
+        ->orderByDesc('recorded_at')
         ->limit(50)
-        ->get(['price', 'recorded_at']);
+        ->get(['price','recorded_at']);
 
-    return response()->json($history);
+    return response()->json(
+        $history->map(fn($item) => [
+            'timestamp' => $item->recorded_at->toDateTimeString(),
+            'price' => (float) $item->price
+        ])
+    );
 }
 }

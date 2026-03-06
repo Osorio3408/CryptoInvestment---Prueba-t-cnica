@@ -18,28 +18,53 @@ class UpdateCryptoPrices extends Command
 
         if (!isset($data['data'])) {
             $this->error('Invalid API response');
-            return;
+            return Command::FAILURE;
         }
 
-        foreach ($data['data'] as $crypto) {
+        foreach (array_slice($data['data'], 0, 20) as $crypto) {
 
-            $cryptocurrency = Cryptocurrency::firstOrCreate(
-                ['cmc_id' => $crypto['id']],
-                [
-                    'name' => $crypto['name'],
-                    'symbol' => $crypto['symbol']
-                ]
-            );
+            // Validar que exista el quote USD
+            if (!isset($crypto['quote']['USD'])) {
+                continue;
+            }
+
+            $quote = $crypto['quote']['USD'] ?? null;
+
+            if (!$quote) {
+                continue;
+            }
+
+
+            $price = $crypto['quote']['USD']['price'] ?? 0;
+            $percentChange = $crypto['quote']['USD']['percent_change_24h'] ?? 0;
+            $volume = $crypto['quote']['USD']['volume_24h'] ?? 0;
+
+$cryptocurrency = Cryptocurrency::updateOrCreate(
+    ['cmc_id' => $crypto['id']],
+    [
+        'name' => $crypto['name'],
+        'symbol' => $crypto['symbol'],
+        'price' => (float) $price,
+        'percent_change_24h' => (float) $percentChange
+    ]
+);
+
+            $cryptocurrency->update([
+                'price' => $price,
+                'percent_change_24h' => $percentChange
+            ]);
 
             PriceHistory::create([
                 'cryptocurrency_id' => $cryptocurrency->id,
-                'price' => $crypto['quote']['USD']['price'],
-                'percent_change_24h' => $crypto['quote']['USD']['percent_change_24h'],
-                'volume_24h' => $crypto['quote']['USD']['volume_24h'],
+                'price' => $price,
+                'percent_change_24h' => $percentChange,
+                'volume_24h' => $volume,
                 'recorded_at' => now()
             ]);
         }
 
         $this->info('Crypto prices updated successfully');
+
+        return Command::SUCCESS;
     }
 }

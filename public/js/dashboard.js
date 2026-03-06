@@ -1,7 +1,6 @@
 let chart;
 
 async function loadCryptos() {
-    
     const table = document.querySelector("#cryptoTable");
 
     table.innerHTML = `
@@ -21,23 +20,30 @@ async function loadCryptos() {
 
         const price = crypto.price ?? 0;
         const change = crypto.percent_change_24h ?? 0;
+        const changeColor = change >= 0 ? "text-green-400" : "text-red-400";
 
         row.innerHTML = `
+        <td>${crypto.id}</td>
         <td>${crypto.name}</td>
         <td>${crypto.symbol}</td>
         <td>${Number(price).toFixed(2)}</td>
-        <td>${Number(change).toFixed(2)}%</td>
+        <td class="${changeColor}">${Number(change).toFixed(2)}%</td>
     `;
 
-        row.onclick = () => loadHistory(crypto.symbol);
+        row.onclick = () => loadHistory(crypto.id);
 
         table.appendChild(row);
     });
 }
 
-async function loadHistory(symbol) {
-    const response = await fetch(`/api/cryptos/${symbol}/history`);
+async function loadHistory(id) {
+    const response = await fetch(`/api/cryptos/${id}/history`);
     const history = await response.json();
+
+    if (!history.length) {
+        console.warn("No history data yet");
+        return;
+    }
 
     const labels = history.map((h) => h.timestamp);
     const prices = history.map((h) => h.price);
@@ -54,7 +60,7 @@ async function loadHistory(symbol) {
             labels: labels,
             datasets: [
                 {
-                    label: symbol,
+                    label: id,
                     data: prices,
                     borderColor: "#38bdf8",
                     tension: 0.4,

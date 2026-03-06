@@ -7,13 +7,14 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class CryptocurrencyResource extends JsonResource
 {
-    public function toArray(Request $request): array
-    {
-        return [
-            'name' => $this->name,
-            'symbol' => $this->symbol,
-            'price' => $this->latest_price,
-            'percent_change_24h' => $this->percent_change_24h,
-        ];
-    }
+public function toArray($request)
+{
+    return [
+        'id' => $this->id,
+        'name' => $this->name,
+        'symbol' => $this->symbol,
+        'price' => $this->price,
+        'percent_change_24h' => $this->percent_change_24h,
+    ];
+}
 }

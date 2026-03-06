@@ -25,6 +25,7 @@ CryptoInvestment Dashboard
 
 <thead class="border-b border-slate-700 text-slate-400">
 <tr>
+    <th>Id</th>
 <th class="py-2">Name</th>
 <th>Symbol</th>
 <th>Price</th>
