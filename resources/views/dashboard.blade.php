@@ -1,59 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>CryptoInvestment Dashboard</title>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta charset="UTF-8">
 
-    <style>
-        body{
-            font-family: Arial;
-            padding:40px;
-            background:#0f172a;
-            color:white;
-        }
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        table{
-            width:100%;
-            border-collapse: collapse;
-            margin-bottom:40px;
-        }
+<title>Crypto Dashboard</title>
 
-        td,th{
-            padding:10px;
-            border-bottom:1px solid #334155;
-        }
-
-        tr:hover{
-            background:#1e293b;
-            cursor:pointer;
-        }
-
-        canvas{
-            max-width:900px;
-        }
-    </style>
 </head>
 
-<body>
+<body class="bg-slate-900 text-white p-10">
 
-<h1>CryptoInvestment Dashboard</h1>
+<h1 class="text-3xl font-bold mb-8">
+CryptoInvestment Dashboard
+</h1>
 
-<table id="cryptoTable">
-<thead>
+<div class="grid grid-cols-2 gap-10">
+
+<div>
+
+<table class="w-full text-left">
+
+<thead class="border-b border-slate-700 text-slate-400">
 <tr>
-<th>Name</th>
+<th class="py-2">Name</th>
 <th>Symbol</th>
 <th>Price</th>
-<th>24h Change</th>
+<th>24h</th>
 </tr>
 </thead>
 
-<tbody></tbody>
+<tbody id="cryptoTable" class="text-sm"></tbody>
+
 </table>
 
+</div>
+
+<div class="bg-slate-800 p-6 rounded-xl">
+
 <canvas id="chart"></canvas>
+
+</div>
+
+</div>
 
 <script src="/js/dashboard.js"></script>
 
