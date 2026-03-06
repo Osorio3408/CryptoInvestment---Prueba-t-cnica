@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('symbol')->index();
             $table->string('cmc_id')->unique();
+            $table->timestamp('updated_at')->nullable();
             $table->timestamps();
         });
     }
